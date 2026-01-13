@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#d63031">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="火锅收银">
+    <meta name="description" content="火锅店智能收银系统">
+    
+    <title>火锅收银台</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        :root {
+            --primary: #d63031;
+            --primary-light: #e17055;
+            --bg-dark: #1a1a2e;
+            --bg-darker: #16213e;
+            --text-white: #ffffff;
+            --text-muted: rgba(255,255,255,0.6);
+            --card-bg: rgba(255,255,255,0.05);
+            --border-color: rgba(255,255,255,0.1);
+            --accent: #ff6b6b;
+            --success: #00b894;
+        }
+        
+        body {
+            font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(180deg, var(--bg-dark) 0%, var(--bg-darker) 100%);
+            min-height: 100vh;
+            color: var(--text-white);
+            padding-bottom: 80px;
+        }
+        
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            padding: 20px;
+            border-radius: 0 0 24px 24px;
+            box-shadow: 0 4px 20px rgba(214,48,49,0.3);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .logo {
+            font-size: 40px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+        }
+        
+        .title {
+            font-size: 24px;
+            font-weight: 900;
+            letter-spacing: 2px;
+        }
+        
+        .subtitle {
+            font-size: 12px;
+            color: rgba(255,255,255,0.8);
+        }
+        
+        .stats-card {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+        }
+        
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .stat-value {
+            font-size: 28px;
+            font-weight: 900;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: rgba(255,255,255,0.8);
+        }
+        
+        .stat-divider {
+            width: 1px;
+            background: rgba(255,255,255,0.3);
+        }
+        
+        /* Main Content */
+        .main {
+            padding: 16px;
+        }
+        
+        .section {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .section-icon {
+            font-size: 18px;
+        }
+        
+        .section-hint {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 400;
+            margin-left: 8px;
+        }
+        
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        
+        .input-group {
+            margin-bottom: 12px;
+        }
+        
+        .input-group:last-child {
+            margin-bottom: 0;
+        }
+        
+        .label {
+            display: block;
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+        
+        .input {
+            width: 100%;
+            padding: 14px 16px;
+            font-size: 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            background: rgba(0,0,0,0.3);
+            color: var(--text-white);
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+        
+        .input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(255,107,107,0.2);
+        }
+        
+        .input::placeholder {
+            color: rgba(255,255,255,0.3);
+        }
+        
+        /* Auto Calculate Display */
+        .auto-calc-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        
+        .auto-calc-item {
+            background: linear-gradient(135deg, rgba(255,107,107,0.2) 0%, rgba(255,107,107,0.1) 100%);
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 1px dashed rgba(255,107,107,0.3);
+        }
+        
+        .auto-label {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        
+        .auto-value {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        
+        .auto-hint {
+            font-size: 10px;
+            color: rgba(255,255,255,0.4);
+        }
+        
+        /* Price Card */
+        .price-card {
+            background: linear-gradient(135deg, #2d3436 0%, var(--bg-dark) 100%);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            border: 2px solid rgba(255,107,107,0.3);
+        }
+        
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: rgba(255,255,255,0.8);
+            font-size: 16px;
+        }
+        
+        .price-subtotal {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-white);
+        }
+        
+        .price-divider {
+            height: 1px;
+            background: var(--border-color);
+            margin: 12px 0;
+        }
+        
+        .price-final {
+            font-size: 32px;
+            font-weight: 900;
+            color: var(--accent);
+            text-shadow: 0 0 20px rgba(255,107,107,0.5);
+        }
+        
+        /* Buttons */
+        .btn {
+            width: 100%;
+            padding: 18px;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-white);
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+        
+        .btn:active {
+            transform: scale(0.98);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            box-shadow: 0 4px 15px rgba(214,48,49,0.4);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, var(--success) 0%, #00cec9 100%);
+            box-shadow: 0 4px 15px rgba(0,184,148,0.4);
+        }
+        
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid var(--border-color);
+        }
+        
+        /* Bottom Navigation */
+        .navbar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(26,26,46,0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0;
+            border-top: 1px solid var(--border-color);
+            z-index: 100;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 12px;
+            cursor: pointer;
+            padding: 8px 24px;
+            border-radius: 12px;
+            position: relative;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+        
+        .nav-item.active {
+            color: var(--accent);
+            background: rgba(255,107,107,0.1);
+        }
+        
+        .nav-icon {
+            font-size: 24px;
+        }
+        
+        .badge {
+            position: absolute;
+            top: 0;
+            right: 12px;
+            background: var(--primary);
+            color: var(--text-white);
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 10px;
+            min-width: 18px;
+            text-align: center;
+        }
+        
+        /* History Page */
+        .history {
+            display: none;
+        }
+        
+        .history.active {
+            display: block;
+        }
+        
+        .cashier {
+            display: block;
+        }
+        
+        .cashier.hidden {
+            display: none;
+        }
+        
+        .history-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+        
+        .empty-icon {
+            font-size: 48px;
+            display: block;
+            margin-bottom: 12px;
+        }
+        
+        .order-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .order-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .order-table {
+            font-weight: 700;
+            color: var(--accent);
+            font-size: 16px;
+        }
+        
+        .order-time {
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+        
+        .order-details {
+            display: flex;
+            justify-content: space-between;
+            color: rgba(255,255,255,0.7);
+            font-size: 14px;
+        }
+        
+        .order-price {
+            font-weight: 700;
+            color: var(--text-white);
+            font-size: 18px;
+        }
+        
+        .order-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        
+        .order-btn {
+            flex: 1;
+            padding: 8px;
+            font-size: 12px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        
+        .order-btn-delete {
+            background: rgba(214,48,49,0.2);
+            color: var(--primary);
+        }
+        
+        /* Settings Page */
+        .settings {
+            display: none;
+        }
+        
+        .settings.active {
+            display: block;
+        }
+        
+        .setting-item {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .setting-label {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+        
+        .setting-input {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            background: rgba(0,0,0,0.3);
+            color: var(--text-white);
+            font-family: inherit;
+        }
+        
+        .setting-input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        
+        /* Date Filter */
+        .date-filter {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        
+        .date-btn {
+            padding: 8px 16px;
+            font-size: 13px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+        
+        .date-btn.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+        
+        /* Export Buttons */
+        .export-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+        
+        .export-buttons .btn {
+            flex: 1;
+            padding: 14px;
+            font-size: 14px;
+        }
+        
+        /* Toast */
+        .toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 16px;
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+        
+        .toast.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+        
+        /* Install Banner */
+        .install-banner {
+            display: none;
+            position: fixed;
+            bottom: 80px;
+            left: 16px;
+            right: 16px;
+            background: linear-gradient(135deg, #2d3436 0%, #1a1a2e 100%);
+            border-radius: 16px;
+            padding: 16px;
+            border: 1px solid var(--accent);
+            z-index: 99;
+            animation: slideUp 0.3s ease;
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(100px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .install-banner.show {
+            display: block;
+        }
+        
+        .install-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .install-icon {
+            font-size: 32px;
+        }
+        
+        .install-text h4 {
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+        
+        .install-text p {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        
+        .install-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        
+        .install-btn {
+            flex: 1;
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        
+        .install-btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+        
+        .install-btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: var(--text-muted);
+        }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 3px;
+        }
+        
+        /* Responsive */
+        @media (min-width: 768px) {
+            body {
+                max-width: 480px;
+                margin: 0 auto;
+                box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+    
+    <!-- Install Banner -->
+    <div class="install-banner" id="installBanner">
+        <div class="install-content">
+            <span class="install-icon">🍲</span>
+            <div class="install-text">
+                <h4>添加到主屏幕</h4>
+                <p>像App一样使用，支持离线</p>
+            </div>
+        </div>
+        <div class="install-actions">
+            <button class="install-btn install-btn-secondary" onclick="dismissInstall()">稍后</button>
+            <button class="install-btn install-btn-primary" onclick="installApp()">立即添加</button>
+        </div>
+    </div>
+    
+    <!-- Header -->
+    <header class="header">
+        <div class="logo-section">
+            <span class="logo">🍲</span>
+            <div>
+                <h1 class="title">火锅收银台</h1>
+                <p class="subtitle">快捷收款 · 轻松管理</p>
+            </div>
+        </div>
+        <div class="stats-card">
+            <div class="stat-item">
+                <span class="stat-value" id="todayTotal">¥0</span>
+                <span class="stat-label">今日营收</span>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+                <span class="stat-value" id="todayCount">0</span>
+                <span class="stat-label">订单数</span>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main Content -->
+    <main class="main">
+        <!-- Cashier Page -->
+        <div class="cashier" id="cashierPage">
+            <!-- Basic Info -->
+            <div class="section">
+                <h2 class="section-title">
+                    <span class="section-icon">📋</span> 基本信息
+                </h2>
+                <div class="row">
+                    <div class="input-group">
+                        <label class="label">桌号</label>
+                        <input type="text" class="input" id="tableNo" placeholder="如: 1" inputmode="text">
+                    </div>
+                    <div class="input-group">
+                        <label class="label">人数</label>
+                        <input type="number" class="input" id="guests" placeholder="如: 4" inputmode="numeric">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Consumption Items -->
+            <div class="section">
+                <h2 class="section-title">
+                    <span class="section-icon">🥘</span> 消费项目
+                </h2>
+                <div class="input-group">
+                    <label class="label">锅底 (元)</label>
+                    <input type="number" class="input" id="hotpot" placeholder="锅底费用" inputmode="decimal">
+                </div>
+                
+                <div class="auto-calc-row">
+                    <div class="auto-calc-item">
+                        <span class="auto-label">蘸水</span>
+                        <span class="auto-value" id="sauceDisplay">¥0</span>
+                        <span class="auto-hint">人数×3</span>
+                    </div>
+                    <div class="auto-calc-item">
+                        <span class="auto-label">素菜</span>
+                        <span class="auto-value" id="veggiesDisplay">¥0</span>
+                        <span class="auto-hint">人数×10</span>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="input-group">
+                        <label class="label">肉黑盘 (元)</label>
+                        <input type="number" class="input" id="meatBlack" placeholder="0" inputmode="decimal">
+                    </div>
+                    <div class="input-group">
+                        <label class="label">肉白盘 (元)</label>
+                        <input type="number" class="input" id="meatWhite" placeholder="0" inputmode="decimal">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Other Items -->
+            <div class="section">
+                <h2 class="section-title">
+                    <span class="section-icon">🍺</span> 其他消费
+                    <span class="section-hint">（不参与折扣）</span>
+                </h2>
+                <div class="row">
+                    <div class="input-group">
+                        <label class="label">切肉 (元)</label>
+                        <input type="number" class="input" id="slicedMeat" placeholder="0" inputmode="decimal">
+                    </div>
+                    <div class="input-group">
+                        <label class="label">酒水 (元)</label>
+                        <input type="number" class="input" id="drinks" placeholder="0" inputmode="decimal">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label class="label">其他 (元)</label>
+                    <input type="number" class="input" id="other" placeholder="0" inputmode="decimal">
+                </div>
+            </div>
+            
+            <!-- Settlement -->
+            <div class="section">
+                <h2 class="section-title">
+                    <span class="section-icon">💰</span> 结算
+                </h2>
+                <div class="row">
+                    <div class="input-group">
+                        <label class="label">折扣 (如0.9=9折)</label>
+                        <input type="number" class="input" id="discount" placeholder="1" value="1" inputmode="decimal">
+                    </div>
+                    <div class="input-group">
+                        <label class="label">实收 (元)</label>
+                        <input type="number" class="input" id="actualPaid" placeholder="实收金额" inputmode="decimal">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label class="label">备注</label>
+                    <input type="text" class="input" id="note" placeholder="备注信息">
+                </div>
+            </div>
+            
+            <!-- Price Display -->
+            <div class="price-card">
+                <div class="price-row">
+                    <span>消费合计</span>
+                    <span class="price-subtotal" id="subtotalDisplay">¥0.00</span>
+                </div>
+                <div class="price-divider"></div>
+                <div class="price-row">
+                    <span>应收金额</span>
+                    <span class="price-final" id="finalPriceDisplay">¥0.00</span>
+                </div>
+            </div>
+            
+            <!-- Submit Button -->
+            <button class="btn btn-primary" onclick="submitOrder()">✓ 确认收款</button>
+        </div>
+        
+        <!-- History Page -->
+        <div class="history" id="historyPage">
+            <h2 class="history-title">订单记录</h2>
+            
+            <!-- Date Filter -->
+            <div class="date-filter">
+                <button class="date-btn active" data-filter="today" onclick="filterOrders('today')">今天</button>
+                <button class="date-btn" data-filter="week" onclick="filterOrders('week')">本周</button>
+                <button class="date-btn" data-filter="month" onclick="filterOrders('month')">本月</button>
+                <button class="date-btn" data-filter="all" onclick="filterOrders('all')">全部</button>
+            </div>
+            
+            <div id="orderList"></div>
+            
+            <div class="export-buttons" id="exportButtons" style="display: none;">
+                <button class="btn btn-success" onclick="exportCSV()">📊 导出CSV</button>
+                <button class="btn btn-secondary" onclick="clearOrders()">🗑️ 清空记录</button>
+            </div>
+        </div>
+        
+        <!-- Settings Page -->
+        <div class="settings" id="settingsPage">
+            <h2 class="history-title">设置</h2>
+            
+            <div class="setting-item">
+                <div class="setting-label">蘸水单价（元/人）</div>
+                <input type="number" class="setting-input" id="saucePrice" value="3" inputmode="decimal">
+            </div>
+            
+            <div class="setting-item">
+                <div class="setting-label">素菜单价（元/人）</div>
+                <input type="number" class="setting-input" id="veggiesPrice" value="10" inputmode="decimal">
+            </div>
+            
+            <div class="setting-item">
+                <div class="setting-label">店铺名称</div>
+                <input type="text" class="setting-input" id="shopName" placeholder="火锅店">
+            </div>
+            
+            <button class="btn btn-primary" onclick="saveSettings()" style="margin-top: 16px;">保存设置</button>
+            
+            <div class="section" style="margin-top: 24px;">
+                <h3 class="section-title"><span class="section-icon">📱</span> 使用说明</h3>
+                <p style="font-size: 14px; color: var(--text-muted); line-height: 1.8;">
+                    1. 点击浏览器菜单「添加到主屏幕」可像App一样使用<br>
+                    2. 数据保存在本地，清除浏览器数据会丢失<br>
+                    3. 建议定期导出CSV备份<br>
+                    4. 支持离线使用
+                </p>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Bottom Navigation -->
+    <nav class="navbar">
+        <button class="nav-item active" data-page="cashier" onclick="switchPage('cashier')">
+            <span class="nav-icon">🧮</span>
+            <span>收银</span>
+        </button>
+        <button class="nav-item" data-page="history" onclick="switchPage('history')">
+            <span class="nav-icon">📑</span>
+            <span>记录</span>
+            <span class="badge" id="orderBadge" style="display: none;">0</span>
+        </button>
+        <button class="nav-item" data-page="settings" onclick="switchPage('settings')">
+            <span class="nav-icon">⚙️</span>
+            <span>设置</span>
+        </button>
+    </nav>
+
+    <script>
+        // ========== 全局状态 ==========
+        let orders = [];
+        let settings = {
+            saucePrice: 3,
+            veggiesPrice: 10,
+            shopName: '火锅店'
+        };
+        let currentFilter = 'today';
+        let deferredPrompt = null;
+        
+        // ========== 初始化 ==========
+        document.addEventListener('DOMContentLoaded', function() {
+            loadData();
+            loadSettings();
+            bindInputEvents();
+            updateStats();
+            updateBadge();
+            
+            // PWA安装提示
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                // 显示安装横幅
+                if (!localStorage.getItem('installDismissed')) {
+                    document.getElementById('installBanner').classList.add('show');
+                }
+            });
+        });
+        
+        // ========== PWA安装 ==========
+        function installApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        showToast('安装成功！');
+                    }
+                    deferredPrompt = null;
+                    document.getElementById('installBanner').classList.remove('show');
+                });
+            }
+        }
+        
+        function dismissInstall() {
+            document.getElementById('installBanner').classList.remove('show');
+            localStorage.setItem('installDismissed', 'true');
+        }
+        
+        // ========== 数据存储 ==========
+        function loadData() {
+            const saved = localStorage.getItem('hotpot_orders');
+            if (saved) {
+                orders = JSON.parse(saved);
+            }
+        }
+        
+        function saveData() {
+            localStorage.setItem('hotpot_orders', JSON.stringify(orders));
+        }
+        
+        function loadSettings() {
+            const saved = localStorage.getItem('hotpot_settings');
+            if (saved) {
+                settings = JSON.parse(saved);
+                document.getElementById('saucePrice').value = settings.saucePrice;
+                document.getElementById('veggiesPrice').value = settings.veggiesPrice;
+                document.getElementById('shopName').value = settings.shopName || '';
+            }
+        }
+        
+        function saveSettings() {
+            settings.saucePrice = parseFloat(document.getElementById('saucePrice').value) || 3;
+            settings.veggiesPrice = parseFloat(document.getElementById('veggiesPrice').value) || 10;
+            settings.shopName = document.getElementById('shopName').value || '火锅店';
+            localStorage.setItem('hotpot_settings', JSON.stringify(settings));
+            showToast('设置已保存');
+            calculate(); // 重新计算
+        }
+        
+        // ========== 页面切换 ==========
+        function switchPage(page) {
+            // 更新导航状态
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.toggle('active', item.dataset.page === page);
+            });
+            
+            // 更新页面显示
+            document.getElementById('cashierPage').classList.toggle('hidden', page !== 'cashier');
+            document.getElementById('historyPage').classList.toggle('active', page === 'history');
+            document.getElementById('settingsPage').classList.toggle('active', page === 'settings');
+            
+            if (page === 'history') {
+                renderOrders();
+            }
+        }
+        
+        // ========== 输入绑定 ==========
+        function bindInputEvents() {
+            const inputs = ['guests', 'hotpot', 'meatBlack', 'meatWhite', 'slicedMeat', 'drinks', 'other', 'discount'];
+            inputs.forEach(id => {
+                document.getElementById(id).addEventListener('input', calculate);
+            });
+        }
+        
+        // ========== 核心计算 ==========
+        function calculate() {
+            const guests = parseFloat(document.getElementById('guests').value) || 0;
+            const hotpot = parseFloat(document.getElementById('hotpot').value) || 0;
+            const meatBlack = parseFloat(document.getElementById('meatBlack').value) || 0;
+            const meatWhite = parseFloat(document.getElementById('meatWhite').value) || 0;
+            const slicedMeat = parseFloat(document.getElementById('slicedMeat').value) || 0;
+            const drinks = parseFloat(document.getElementById('drinks').value) || 0;
+            const other = parseFloat(document.getElementById('other').value) || 0;
+            const discount = parseFloat(document.getElementById('discount').value) || 1;
+            
+            // 自动计算项
+            const sauce = guests * settings.saucePrice;
+            const veggies = guests * settings.veggiesPrice;
+            
+            // 合计
+            const subtotal = hotpot + sauce + veggies + meatBlack + meatWhite + slicedMeat + drinks + other;
+            
+            // 折后价：(锅底+蘸水+素菜+肉黑盘+肉白盘) × 折扣 + 切肉+酒水+其他
+            const discountable = hotpot + sauce + veggies + meatBlack + meatWhite;
+            const nonDiscountable = slicedMeat + drinks + other;
+            const finalPrice = discountable * discount + nonDiscountable;
+            
+            // 更新显示
+            document.getElementById('sauceDisplay').textContent = '¥' + sauce.toFixed(0);
+            document.getElementById('veggiesDisplay').textContent = '¥' + veggies.toFixed(0);
+            document.getElementById('subtotalDisplay').textContent = '¥' + subtotal.toFixed(2);
+            document.getElementById('finalPriceDisplay').textContent = '¥' + finalPrice.toFixed(2);
+            
+            return { sauce, veggies, subtotal, finalPrice };
+        }
+        
+        // ========== 提交订单 ==========
+        function submitOrder() {
+            const tableNo = document.getElementById('tableNo').value;
+            const guests = document.getElementById('guests').value;
+            
+            if (!tableNo || !guests) {
+                showToast('请填写桌号和人数');
+                return;
+            }
+            
+            const result = calculate();
+            
+            const order = {
+                id: Date.now(),
+                tableNo: tableNo,
+                guests: parseFloat(guests) || 0,
+                hotpot: parseFloat(document.getElementById('hotpot').value) || 0,
+                sauce: result.sauce,
+                veggies: result.veggies,
+                meatBlack: parseFloat(document.getElementById('meatBlack').value) || 0,
+                meatWhite: parseFloat(document.getElementById('meatWhite').value) || 0,
+                slicedMeat: parseFloat(document.getElementById('slicedMeat').value) || 0,
+                drinks: parseFloat(document.getElementById('drinks').value) || 0,
+                other: parseFloat(document.getElementById('other').value) || 0,
+                discount: parseFloat(document.getElementById('discount').value) || 1,
+                subtotal: result.subtotal,
+                finalPrice: result.finalPrice,
+                actualPaid: parseFloat(document.getElementById('actualPaid').value) || result.finalPrice,
+                note: document.getElementById('note').value,
+                timestamp: new Date().toISOString(),
+                date: new Date().toLocaleDateString('zh-CN')
+            };
+            
+            orders.push(order);
+            saveData();
+            updateStats();
+            updateBadge();
+            clearForm();
+            showToast('收款成功 ¥' + result.finalPrice.toFixed(2));
+        }
+        
+        // ========== 清空表单 ==========
+        function clearForm() {
+            const fields = ['tableNo', 'guests', 'hotpot', 'meatBlack', 'meatWhite', 'slicedMeat', 'drinks', 'other', 'actualPaid', 'note'];
+            fields.forEach(id => {
+                document.getElementById(id).value = '';
+            });
+            document.getElementById('discount').value = '1';
+            calculate();
+        }
+        
+        // ========== 统计更新 ==========
+        function updateStats() {
+            const today = new Date().toLocaleDateString('zh-CN');
+            const todayOrders = orders.filter(o => o.date === today);
+            const total = todayOrders.reduce((sum, o) => sum + o.finalPrice, 0);
+            
+            document.getElementById('todayTotal').textContent = '¥' + total.toFixed(0);
+            document.getElementById('todayCount').textContent = todayOrders.length;
+        }
+        
+        function updateBadge() {
+            const today = new Date().toLocaleDateString('zh-CN');
+            const todayCount = orders.filter(o => o.date === today).length;
+            const badge = document.getElementById('orderBadge');
+            
+            if (todayCount > 0) {
+                badge.textContent = todayCount;
+                badge.style.display = 'block';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+        
+        // ========== 订单筛选 ==========
+        function filterOrders(filter) {
+            currentFilter = filter;
+            document.querySelectorAll('.date-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.filter === filter);
+            });
+            renderOrders();
+        }
+        
+        function getFilteredOrders() {
+            const now = new Date();
+            const today = now.toLocaleDateString('zh-CN');
+            
+            switch (currentFilter) {
+                case 'today':
+                    return orders.filter(o => o.date === today);
+                case 'week':
+                    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                    return orders.filter(o => new Date(o.timestamp) >= weekAgo);
+                case 'month':
+                    const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+                    return orders.filter(o => new Date(o.timestamp) >= monthAgo);
+                default:
+                    return orders;
+            }
+        }
+        
+        // ========== 渲染订单列表 ==========
+        function renderOrders() {
+            const filtered = getFilteredOrders().sort((a, b) => b.id - a.id);
+            const container = document.getElementById('orderList');
+            const exportBtns = document.getElementById('exportButtons');
+            
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <span class="empty-icon">📝</span>
+                        <p>暂无订单记录</p>
+                    </div>
+                `;
+                exportBtns.style.display = 'none';
+                return;
+            }
+            
+            // 计算统计
+            const total = filtered.reduce((sum, o) => sum + o.finalPrice, 0);
+            
+            container.innerHTML = `
+                <div class="section" style="margin-bottom: 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="color: var(--text-muted);">共 ${filtered.length} 单</span>
+                        <span style="font-size: 20px; font-weight: 700; color: var(--accent);">¥${total.toFixed(2)}</span>
+                    </div>
+                </div>
+                <div class="order-list">
+                    ${filtered.map(order => `
+                        <div class="order-card">
+                            <div class="order-header">
+                                <span class="order-table">桌号 ${order.tableNo}</span>
+                                <span class="order-time">${formatTime(order.timestamp)}</span>
+                            </div>
+                            <div class="order-details">
+                                <span>${order.guests}人 · ${order.discount < 1 ? (order.discount * 10).toFixed(0) + '折' : '无折扣'}</span>
+                                <span class="order-price">¥${order.finalPrice.toFixed(2)}</span>
+                            </div>
+                            ${order.note ? `<div style="font-size: 12px; color: var(--text-muted); margin-top: 8px;">备注: ${order.note}</div>` : ''}
+                            <div class="order-actions">
+                                <button class="order-btn order-btn-delete" onclick="deleteOrder(${order.id})">删除</button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            
+            exportBtns.style.display = 'flex';
+        }
+        
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleString('zh-CN', {
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+        
+        // ========== 删除订单 ==========
+        function deleteOrder(id) {
+            if (confirm('确定删除此订单？')) {
+                orders = orders.filter(o => o.id !== id);
+                saveData();
+                updateStats();
+                updateBadge();
+                renderOrders();
+                showToast('已删除');
+            }
+        }
+        
+        function clearOrders() {
+            if (confirm('确定清空所有记录？此操作不可恢复！')) {
+                orders = [];
+                saveData();
+                updateStats();
+                updateBadge();
+                renderOrders();
+                showToast('已清空');
+            }
+        }
+        
+        // ========== 导出CSV ==========
+        function exportCSV() {
+            const filtered = getFilteredOrders();
+            if (filtered.length === 0) {
+                showToast('暂无数据');
+                return;
+            }
+            
+            const headers = ['桌号', '人数', '锅底', '蘸水', '素菜', '肉黑盘', '肉白盘', '切肉', '酒水', '其他', '折扣', '合计', '折后', '实收', '备注', '时间'];
+            const rows = filtered.map(o => [
+                o.tableNo,
+                o.guests,
+                o.hotpot,
+                o.sauce,
+                o.veggies,
+                o.meatBlack,
+                o.meatWhite,
+                o.slicedMeat,
+                o.drinks,
+                o.other,
+                o.discount,
+                o.subtotal.toFixed(2),
+                o.finalPrice.toFixed(2),
+                o.actualPaid,
+                o.note || '',
+                new Date(o.timestamp).toLocaleString('zh-CN')
+            ]);
+            
+            const csv = '\uFEFF' + [headers, ...rows].map(r => r.join(',')).join('\n');
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${settings.shopName}_收款记录_${new Date().toLocaleDateString('zh-CN').replace(/\//g, '-')}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('导出成功');
+        }
+        
+        // ========== Toast提示 ==========
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+        
+        // ========== 注册Service Worker ==========
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('Service Worker 注册成功:', registration.scope);
+                    })
+                    .catch(error => {
+                        console.log('Service Worker 注册失败:', error);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>
